@@ -46,6 +46,24 @@ python yolov7\export.py --weights path\to\pretrain\model\.pt --device 0 --grid -
 python tensorrt-python\export.py -o path\to\exported\.onnx -e path\to\exported\.trt -p fp32
 ```
 
+# Examples
+```
+import cv2
+from model_inference import *
+from utils import 
+
+# ONNX
+class_ = ['car']
+img = cv2.imread('vid_5_31600.jpg')
+output, ratio, dwdh = inference_onnx(img, 'best_v7_16.onnx')
+postprocessing(img, ratio, dwdh, output, save_img='test.jpg', show_img=True, class_=class_)
+
+# TRT
+img = cv2.imread('vid_5_31600.jpg')
+output, ratio, dwdh = inference_trt(img, 'best_v7_16.trt')
+postprocessing(img, ratio, dwdh, output, save_img='test.jpg', show_img=True, class_=class_)
+```
+
 # Inference
 
 ## YOLOv5
