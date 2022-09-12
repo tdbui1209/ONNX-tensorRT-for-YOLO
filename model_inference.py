@@ -10,7 +10,6 @@ def inference_onnx(img, onnx_path, v7=True, fp16=False):
     import onnx
     import onnxruntime
 
-
     # CHECK MODEL ONNX
     onnx_model = onnx.load(onnx_path)
     try:
@@ -68,11 +67,10 @@ def inference_trt(img, engine_path, v7=True, fp16=False):
     stream = cuda.Stream()
 
     # USE YOLOv7?
-    if not v7:
-        # USE FP16?
-        if fp16:
-            host_input, ratio, dwdh = preprocesing(img, fp16=True)
-            host_output = cuda.pagelocked_empty(trt.volume(output_shape), dtype=np.float16)
+    if not v7 and fp16:
+    # USE FP16?
+        host_input, ratio, dwdh = preprocesing(img, fp16=True)
+        host_output = cuda.pagelocked_empty(trt.volume(output_shape), dtype=np.float16)
     else:
         host_input, ratio, dwdh = preprocesing(img)
         host_output = cuda.pagelocked_empty(trt.volume(output_shape), dtype=np.float32)

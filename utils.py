@@ -140,8 +140,7 @@ def letterbox(im, new_shape=(640, 640), color=(114, 114, 114), auto=True, scaleu
 
 
 def preprocesing(img, img_size=(640, 640), fp16=False):
-    # img = cv2.resize(img, img_size)
-    img, ratio, dwdh = letterbox(img, auto=False)
+    img, ratio, dwdh = letterbox(img, new_shape=img_size, auto=False)
     img = img[:, :, ::-1].transpose(2, 0, 1)
 
     if fp16:
@@ -154,7 +153,7 @@ def preprocesing(img, img_size=(640, 640), fp16=False):
     return img, ratio, dwdh
 
 
-def postprocessing(img, ratio, dwdh, output, conf_threshold=0.25, iou_threshold=0.45, save_img=None, show_img=True, class_=None):
+def postprocessing(img, ratio, dwdh, output, conf_threshold=0.25, iou_threshold=0.45, save_img=None, show_img=True, class_=None, colors=None):
     pred = non_max_suppression(output, conf_threshold, iou_threshold)[0]
     for i, (x0, y0, x1, y1, score, cls_id) in enumerate(pred):
         box = np.array([x0,y0,x1,y1])
@@ -163,10 +162,11 @@ def postprocessing(img, ratio, dwdh, output, conf_threshold=0.25, iou_threshold=
         box = box.round().astype(np.int32).tolist()
         score = round(float(score), 3)
         cls_id = int(cls_id)
+        color = colors[class_[cls_id]]
 
-        cv2.rectangle(img, box[:2], box[2:], (0, 0, 255), 1)
-        cv2.putText(img, class_[cls_id], (box[0] + box[2] - box[0] - 2, box[1] - 2), cv2.FONT_HERSHEY_SIMPLEX, 0.75, (0, 0, 255), thickness=1)
-        cv2.putText(img, str(round(float(score), 2)), (box[0], box[1] - 2), cv2.FONT_HERSHEY_COMPLEX, 0.5, (0, 0, 255), 1)
+        cv2.rectangle(img, box[:2], box[2:], color, 2)
+        cv2.putText(img, class_[cls_id], (box[2] - (box[2] - box[0]) // 4, box[1] - 2), cv2.FONT_HERSHEY_SIMPLEX, 0.75, color, thickness=2)
+        cv2.putText(img, str(round(float(score), 2)), (box[0], box[1] - 2), cv2.FONT_HERSHEY_COMPLEX, 0.5, color, 2)
         
     if save_img:
         cv2.imwrite(save_img, img)
@@ -174,4 +174,3 @@ def postprocessing(img, ratio, dwdh, output, conf_threshold=0.25, iou_threshold=
     if show_img:
         cv2.imshow('img', img)
         cv2.waitKey(0)
-        
